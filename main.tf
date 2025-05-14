@@ -5,6 +5,14 @@ locals {
   instance_id = var.create_instance ? aws_connect_instance.this[0].id : var.instance_id
 }
 
+data "aws_region" "current" {
+  provider = aws.main
+}
+
+data "aws_caller_identity" "current" {
+  provider = aws.main
+}
+
 ################################################################################
 # Instance
 ################################################################################
@@ -23,6 +31,7 @@ resource "aws_connect_instance" "this" {
   directory_id                     = var.instance_directory_id
   early_media_enabled              = var.instance_early_media_enabled
   instance_alias                   = var.instance_alias
+  multi_party_conference_enabled   = var.instance_multi_party_conference_enabled
 
   lifecycle {
     precondition {
@@ -40,6 +49,7 @@ resource "aws_connect_instance" "this" {
       error_message = "When create_instance is true, instance_outbound_calls_enabled is required."
     }
   }
+  provider = aws.main
 }
 
 ################################################################################
@@ -104,6 +114,7 @@ resource "aws_connect_instance_storage_config" "this" {
       }
     }
   }
+  provider = aws.main
 }
 
 ################################################################################
@@ -145,6 +156,7 @@ resource "aws_connect_hours_of_operation" "this" {
     var.hours_of_operations_tags,
     try(each.value.tags, {})
   )
+  provider = aws.main
 }
 
 ################################################################################
@@ -173,6 +185,7 @@ resource "aws_connect_contact_flow" "this" {
     var.contact_flow_tags,
     try(each.value.tags, {})
   )
+  provider = aws.main
 }
 
 resource "aws_connect_contact_flow_module" "this" {
@@ -197,6 +210,7 @@ resource "aws_connect_contact_flow_module" "this" {
     var.contact_flow_module_tags,
     try(each.value.tags, {})
   )
+  provider = aws.main
 }
 
 ################################################################################
@@ -234,6 +248,7 @@ resource "aws_connect_queue" "this" {
     var.queue_tags,
     try(each.value.tags, {})
   )
+  provider = aws.main
 }
 
 ################################################################################
@@ -287,6 +302,7 @@ resource "aws_connect_quick_connect" "this" {
     var.quick_connect_tags,
     try(each.value.tags, {})
   )
+  provider = aws.main
 }
 
 ################################################################################
@@ -330,6 +346,7 @@ resource "aws_connect_routing_profile" "this" {
     var.routing_profile_tags,
     try(each.value.tags, {})
   )
+  provider = aws.main
 }
 
 resource "aws_connect_security_profile" "this" {
@@ -350,6 +367,7 @@ resource "aws_connect_security_profile" "this" {
     var.security_profile_tags,
     try(each.value.tags, {})
   )
+  provider = aws.main
 }
 
 ################################################################################
@@ -371,6 +389,7 @@ resource "aws_connect_vocabulary" "this" {
     var.vocabulary_tags,
     try(each.value.tags, {})
   )
+  provider = aws.main
 }
 
 ################################################################################
@@ -388,6 +407,7 @@ resource "aws_connect_bot_association" "this" {
     # optional
     lex_region = try(each.value.lex_region, null)
   }
+  provider = aws.main
 }
 
 resource "aws_connect_lambda_function_association" "this" {
@@ -395,6 +415,8 @@ resource "aws_connect_lambda_function_association" "this" {
 
   function_arn = each.value
   instance_id  = local.instance_id
+
+  provider = aws.main
 }
 
 ################################################################################
@@ -442,6 +464,7 @@ resource "aws_connect_user" "this" {
     var.user_tags,
     try(each.value.tags, {})
   )
+  provider = aws.main
 }
 
 resource "aws_connect_user_hierarchy_group" "this" {
@@ -461,6 +484,7 @@ resource "aws_connect_user_hierarchy_group" "this" {
     var.user_hierarchy_group_tags,
     try(each.value.tags, {})
   )
+  provider = aws.main
 }
 
 resource "aws_connect_user_hierarchy_structure" "this" {
@@ -511,4 +535,21 @@ resource "aws_connect_user_hierarchy_structure" "this" {
       }
     }
   }
+  provider = aws.main
+}
+
+
+
+################################################################################
+# Agent Connect Status
+################################################################################
+resource "awscc_connect_agent_status" "this" {
+  for_each = var.agent_statuses
+
+  name         = each.key
+  description  = each.value.description
+  state        = each.value.state
+  instance_arn = "arn:aws:connect:${data.aws_region.current.name}:${data.aws_caller_identity.current.id}:instance/${var.instance_id}"
+
+  provider = awscc.main
 }

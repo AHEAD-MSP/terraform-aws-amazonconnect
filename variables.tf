@@ -72,6 +72,11 @@ variable "instance_alias" {
   description = "Specifies the name of the instance. Required if instance_directory_id not specified."
 }
 
+variable "instance_multi_party_conference_enabled" {
+  type        = bool
+  default     = false
+  description = "Specifies whether multi-party calls/conference is enabled"
+}
 ################################################################################
 # Instance Storage Config
 ################################################################################
@@ -533,4 +538,14 @@ variable "tags" {
   type        = map(string)
   default     = {}
   description = "A map of tags to add to all resources."
+}
+
+
+################################################################################
+# Connect Agent Statuses
+################################################################################
+variable "agent_statuses" {
+  type        = any
+  default     = {}
+  description = "Map of agent status'"
 }
