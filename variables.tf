@@ -549,3 +549,10 @@ variable "agent_statuses" {
   default     = {}
   description = "Map of agent status'"
 }
+
+
+variable "approved_origins" {
+  type        = list(string)
+  default     = []
+  description = "List of approved origins for the instance"
+}
