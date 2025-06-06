@@ -553,3 +553,12 @@ resource "awscc_connect_agent_status" "this" {
 
   provider = awscc.main
 }
+
+
+resource "awscc_connect_approved_origin" "this" {
+  for_each    = toset(var.approved_origins)
+  instance_id = "arn:aws:connect:${data.aws_region.current.name}:${data.aws_caller_identity.current.id}:instance/${var.instance_id}"
+  origin      = each.value
+
+  provider = awscc.main
+}
