@@ -248,6 +248,11 @@ resource "aws_connect_queue" "this" {
     var.queue_tags,
     try(each.value.tags, {})
   )
+
+  lifecycle {
+    ignore_changes = [quick_connect_ids]
+  }
+
   provider = aws.main
 }
 
